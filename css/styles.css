@@ -19,9 +19,3 @@ label{
     grid-template-columns: repeat(5, 1fr);
     gap: 10px;
 }
-.button-group button{
-   border-radius: 2px;
-   color: white;
-   background: green;
-   padding: 2px 5px;
-}
