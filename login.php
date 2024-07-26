@@ -1,6 +1,11 @@
 <?php
+session_start();
 $title="Login";
 include('./includes/header.php');
+if(isset($_SESSION['userId'])){
+	header('location:index.php');
+	exit();
+}
 ?>
 <?php
 include('./config/db.php');
@@ -19,7 +24,7 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
 		$res = $result->fetch_assoc();
 		$dbPassword = $res['password'];
 
-		if($dbPassword == $password){
+		if(password_verify($password, $dbPassword)){
 			$_SESSION['username'] = $username;
 			$_SESSION['userId'] = $res['ID'];
 			header('location: index.php');
@@ -36,7 +41,7 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
 }
 
 ?>
-<div class="h-screen w-full bg-[#d2d6de]">
+<div class="h-screen w-full">
 	<div class="container flex flex-col items-center justify-center gap-5">
 		<h1 class="text-3xl text-center">Login</h1>
 		<div class="bg-white p-2 w-[300px] py-3 rounded-sm">
