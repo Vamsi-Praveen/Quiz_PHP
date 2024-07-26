@@ -7,4 +7,4 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
-<body>
+<body class="bg-gray-100">
