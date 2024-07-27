@@ -28,7 +28,12 @@ include('./includes/header.php');
                 header("location:index.php");
                 exit();
             }
-            $time_remaining = $end_time->diff($time)->format('Y-m-d H:i:s');
+            $interval = $end_time->diff($time);
+            $hours = $interval->days * 24 + $interval->h; // Total hours including days
+            $minutes = $interval->i; // Minutes
+            $seconds = $interval->s; // Seconds
+            $time_remaining = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+
             $stmt = $conn->prepare('SELECT q.id, q.question_text, o.id AS option_id, o.option_text 
             FROM questions q 
             JOIN options o ON q.id = o.question_id 
@@ -88,23 +93,79 @@ include('./includes/header.php');
            <div>
                 <div class="border-b border-slate-200 pb-2 mb-2">
                 <p class="text-red-500">Time Remaining</p>
-                <h2 class="text-4xl">00:00:00</h2>
+                <h2 class="text-4xl" id="timer">00:00:00</h2>
             </div>
             <div class="question-grid">
                 <?php foreach(array_values($questions) as $index=>$question):?>
-                <button class="bg-gray-200 px-1 py-1.5 rounded-sm" onclick="showQuestion(<?php echo $index?>)"><?php echo $index+1?></button>
+                <button class="bg-gray-200 px-1 py-1.5 rounded-sm" id="q-nav-<?php echo $index?>" onclick="showQuestion(<?php echo $index?>)"><?php echo $index+1?></button>
                 <?php endforeach;?>
             </div>
            </div>
             <div class="self-end mt-2">
-                <button class="bg-red-400 text-white px-3 py-2 rounded-sm">Submit</button>
+                <button class="bg-red-400 text-white px-3 py-2 rounded-sm" onclick="submittest()">Submit</button>
             </div>
         </div>
     </div>
 </div>
+<div class="h-screen w-full bg-black/70 absolute inset-0 z-10 flex items-center justify-center hidden transition" id="scoremodal">
+    <div class="bg-white w-1/4 p-3 rounded-sm">
+        <h1 class="text-xl font-medium">Test Score</h1>
+        <h2 class="text-xl mt-2"><span class="text-2xl font-medium text-green-600" id="score">0</span>&nbsp;/&nbsp;<span id="totalQ">0</span></h2>
+
+        <a class="bg-red-400 text-white rounded-sm px-1.5 py-2 mt-3 inline-block" href="index.php">Continue</a>
+    </div>
+</div>
 <script>
-     var currentQuestion = 0;
+    var currentQuestion = 0;
     const totalQuestions = <?php echo count($questions);?>;
+
+    var time_remaining = "<?php echo $time_remaining;?>";
+
+    const timer = document.getElementById('timer');
+    const score = document.getElementById('score');
+    const totalQ = document.getElementById('totalQ');
+    const modal = document.getElementById('scoremodal');
+
+    totalQ.textContent = totalQuestions;
+
+   function parseTime(time){
+        const hours = parseInt(time.split(':')[0]);
+        const minutes = parseInt(time.split(':')[1]);
+        const seconds = parseInt(time.split(':')[2]);
+        return (hours*3600)+(minutes*60)+seconds;
+    }
+    var totalSeconds = parseTime(time_remaining);
+    function updateTimer(){
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        timer.textContent=`${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`
+        if(totalSeconds<=0){
+            clearInterval(timerInterval);
+            submittest();
+            window.location.href = "index.php";
+        }
+        else
+        {
+            totalSeconds--;
+        }
+    }
+    const timerInterval = setInterval(updateTimer,1000)
+    updateTimer()
+
+    function submittest(){
+        clearInterval(timerInterval);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST','quiz_ajax.php',true);
+        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function(){
+            if(this.readyState==4 && this.status==200){
+                score.textContent = this.responseText;
+                modal.classList.remove('hidden');
+            }
+        }
+        xhr.send(`testId=<?php echo $quizId?>&action=FETCH`)
+    }
 
    function showQuestion(index) {
         document.querySelectorAll('.question').forEach(question => question.style.display = 'none');
@@ -113,6 +174,22 @@ include('./includes/header.php');
     }
 
     function saveAndNext() {
+        const selectedQuestion = document.getElementById(`question-${currentQuestion}`);
+        const selectedOption = selectedQuestion.querySelector('input[type="radio"]:checked');
+        if(selectedOption){
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST','quiz_ajax.php',true);
+            xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState==4 && xhr.status ==200){
+                    console.log('answer saved');
+                }
+            }
+            xhr.send(`questionId=${currentQuestion+1}&selectedOptionId=${selectedOption.value}&testId=<?php echo $quizId?>&action=INSERT`)
+            document.getElementById(`q-nav-${currentQuestion}`).classList.remove('bg-gray-200');
+            document.getElementById(`q-nav-${currentQuestion}`).classList.add('bg-green-400');
+            document.getElementById(`q-nav-${currentQuestion}`).classList.add('text-white');
+        }
         if (currentQuestion < totalQuestions-1) {
             showQuestion(currentQuestion + 1);
         }

@@ -1,4 +1,4 @@
-<script>
+<!-- <script>
       document.addEventListener('contextmenu',function(e){
         e.preventDefault();
     })
@@ -7,6 +7,6 @@
           e.preventDefault();
         }
       })
-</script>
+</script> -->
 </body>
 </html>
