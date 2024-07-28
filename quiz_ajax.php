@@ -16,12 +16,29 @@
 			$is_correct = $result['is_correct'];
 			$stmt->close();
 
-			$stmt = $conn->prepare('INSERT INTO user_responses(user_id,test_id,question_id,selected_option_id,is_correct) VALUES(?,?,?,?,?)');
-
-			$stmt->bind_param('iiiii',$userId,$testId,$questionId,$selectedOptionId,$is_correct);
-			$stmt->execute();
-			echo $stmt->insert_id;
-			$stmt->close();
+			//check existing response for question
+			$stmt = $conn->prepare('SELECT * FROM user_responses WHERE user_id = ? AND test_id = ? AND question_id = ?');
+            $stmt->bind_param('iii', $userId, $testId, $questionId);
+            $stmt->execute();
+            $response = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+			if($response){
+				//update the option
+				$stmt = $conn->prepare('UPDATE user_responses SET selected_option_id = ?, is_correct = ? WHERE user_id = ? AND test_id = ? AND question_id = ?');
+                $stmt->bind_param('iiiii', $selectedOptionId, $is_correct, $userId, $testId, $questionId);
+                if($stmt->execute()){
+                    echo $stmt->insert_id;
+                }
+                $stmt->close();
+			}
+			else
+			{
+				$stmt = $conn->prepare('INSERT INTO user_responses(user_id,test_id,question_id,selected_option_id,is_correct) VALUES(?,?,?,?,?)');
+				$stmt->bind_param('iiiii',$userId,$testId,$questionId,$selectedOptionId,$is_correct);
+				$stmt->execute();
+				echo $stmt->insert_id;
+				$stmt->close();
+			}
 		}
 		elseif($action == 'FETCH') {
 	        $stmt = $conn->prepare('SELECT COUNT(*) as correct FROM user_responses WHERE is_correct = 1 AND user_id = ? AND test_id = ?');
