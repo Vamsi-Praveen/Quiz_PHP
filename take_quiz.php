@@ -7,6 +7,7 @@ if(!(isset($_SESSION['userId']))){
 ?>
 <?php
 include('./includes/header.php');
+include('./utils/functions.php');
 ?>
 <?php
     date_default_timezone_set('Asia/Kolkata');
@@ -14,7 +15,8 @@ include('./includes/header.php');
     $current_time = $time->format('Y-m-d H:i:s');
     include('./config/db.php');
     if($_SERVER['REQUEST_METHOD']=='GET'){
-        $quizId = mysqli_real_escape_string($conn,$_GET['quizId']);
+        $id = mysqli_real_escape_string($conn,$_GET['quizId']);
+        $quizId = decrypt_data($id);
 
         $stmt = $conn->prepare('SELECT * FROM tests WHERE id=?');
         $stmt->bind_param('i',$quizId);
