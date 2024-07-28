@@ -121,6 +121,11 @@ include('./includes/header.php');
 
     var time_remaining = "<?php echo $time_remaining;?>";
 
+    var questions = <?php echo json_encode(array_values($questions)); ?>;
+
+
+    console.log(questions)
+
     const timer = document.getElementById('timer');
     const score = document.getElementById('score');
     const totalQ = document.getElementById('totalQ');
@@ -185,7 +190,7 @@ include('./includes/header.php');
                     console.log('answer saved');
                 }
             }
-            xhr.send(`questionId=${currentQuestion+1}&selectedOptionId=${selectedOption.value}&testId=<?php echo $quizId?>&action=INSERT`)
+            xhr.send(`questionId=${questions[currentQuestion]?.id}&selectedOptionId=${selectedOption.value}&testId=<?php echo $quizId?>&action=INSERT`)
             document.getElementById(`q-nav-${currentQuestion}`).classList.remove('bg-gray-200');
             document.getElementById(`q-nav-${currentQuestion}`).classList.add('bg-green-400');
             document.getElementById(`q-nav-${currentQuestion}`).classList.add('text-white');
