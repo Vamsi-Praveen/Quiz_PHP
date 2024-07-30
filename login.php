@@ -11,6 +11,7 @@ if(isset($_SESSION['userId'])){
 include('./config/db.php');
 $loginError=false;
 $error_message = "";
+
 if($_SERVER['REQUEST_METHOD']=='POST'){
 	$username = $_POST['username'];
 	$password = $_POST['password'];
@@ -27,7 +28,15 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
 		if(password_verify($password, $dbPassword)){
 			$_SESSION['username'] = $username;
 			$_SESSION['userId'] = $res['ID'];
-			header('location: index.php');
+
+			if(isset($_GET['redirect'])){
+				$redirectUrl = urldecode(mysqli_real_escape_string($conn,$_GET['redirect']));
+				header('location:'.$redirectUrl);
+			}
+			else
+			{
+				header('location: index.php');
+			}
 			exit();
 		} else {
 			$loginError = true;

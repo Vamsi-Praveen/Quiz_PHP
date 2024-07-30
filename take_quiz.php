@@ -1,13 +1,13 @@
 <?php
 session_start();
+include('./utils/functions.php');
 if(!(isset($_SESSION['userId']))){
-    header("location:login.php");
+    header("location:login.php?redirect=".getCurrentUrl());
     exit();
 }
 ?>
 <?php
 include('./includes/header.php');
-include('./utils/functions.php');
 ?>
 <?php
     date_default_timezone_set('Asia/Kolkata');
@@ -17,6 +17,18 @@ include('./utils/functions.php');
     if($_SERVER['REQUEST_METHOD']=='GET'){
         $id = mysqli_real_escape_string($conn,$_GET['quizId']);
         $quizId = decrypt_data($id);
+
+        $stmt_user = $conn->prepare("SELECT completed_tests FROM user WHERE id = ?");
+        $stmt_user->bind_param('i', $_SESSION['userId']);
+        $stmt_user->execute();
+        $result_user = $stmt_user->get_result();
+        $user_data = $result_user->fetch_assoc();
+        $completed_tests = json_decode($user_data['completed_tests'], true) ?? [];
+        if(in_array($quizId,$completed_tests)){
+            header("location:index.php");
+            exit();
+        }
+        $stmt_user->close();
 
         $stmt = $conn->prepare('SELECT * FROM tests WHERE id=?');
         $stmt->bind_param('i',$quizId);

@@ -2,14 +2,14 @@
 session_start();
 $title = "Quiz";
 include('./includes/header.php');
-if(!isset($_SESSION['userId'])){
-    header("location:login.php");
-    exit();
-}
+// if(!isset($_SESSION['userId'])){
+//     header("location:login.php");
+//     exit();
+// }
 ?>
 
 <?php
-$userId = $_SESSION['userId'];
+// $userId = $_SESSION['userId'];
 include('./config/db.php');
 include('./utils/functions.php');
 date_default_timezone_set('Asia/Kolkata');
@@ -20,19 +20,30 @@ $stmt->execute();
 $result = $stmt->get_result();
 $stmt->close();
 
-$stmt_user = $conn->prepare("SELECT completed_tests FROM user WHERE id = ?");
-$stmt_user->bind_param('i', $userId);
-$stmt_user->execute();
-$result_user = $stmt_user->get_result();
-$user_data = $result_user->fetch_assoc();
-$completed_tests = json_decode($user_data['completed_tests'], true) ?? [];
-$stmt_user->close();
+if(isset($_SESSION['userId'])){
+    $stmt_user = $conn->prepare("SELECT completed_tests FROM user WHERE id = ?");
+    $stmt_user->bind_param('i', $_SESSION['userId']);
+    $stmt_user->execute();
+    $result_user = $stmt_user->get_result();
+    $user_data = $result_user->fetch_assoc();
+    $completed_tests = json_decode($user_data['completed_tests'], true) ?? [];
+    $stmt_user->close();
+}
 ?>
 
 <div class="container">
    <div class="flex items-center justify-between">
         <h1 class="text-center text-2xl">Quiz App</h1>
-        <a class="bg-red-400 px-3 py-2 text-white rounded-sm" href="logout.php">Logout</a>
+       <?php
+            if(isset($_SESSION['userId'])){
+                echo '<a class="bg-red-400 px-3 py-2 text-white rounded-sm" href="logout.php">Logout</a>';
+            }
+            else
+            {
+                echo '<a class="bg-red-400 px-3 py-2 text-white rounded-sm" href="login.php">Login</a>';
+            }
+
+       ?>
    </div>
     <div class="mt-5">
         <!-- <h1 class="text-center text-xl">No tests</h1> -->
@@ -41,7 +52,7 @@ $stmt_user->close();
             $start_time = $row['start_time'];
             $end_time = $row['end_time'];
             $is_active = $current_time >= $start_time && $current_time <= $end_time;
-            $is_completed = $current_time > $end_time || in_array($row['id'], $completed_tests);
+            $is_completed = $current_time > $end_time || ( isset($_SESSION['userId']) && in_array($row['id'], $completed_tests));
 
             $stmt_q = $conn->prepare("SELECT COUNT(*) AS total_questions FROM questions WHERE test_id=?");
             $stmt_q->bind_param('i',$row['id']);
@@ -49,20 +60,24 @@ $stmt_user->close();
             $result_questions = $stmt_q->get_result()->fetch_assoc();
             $total_questions = $result_questions['total_questions'];
 
-             $stmt_correct = $conn->prepare("SELECT COUNT(*) AS correct_answers FROM user_responses WHERE user_id = ? AND test_id = ? AND is_correct = 1");
-            $stmt_correct->bind_param('ii', $userId, $row['id']);
-            $stmt_correct->execute();
-            $result_correct = $stmt_correct->get_result()->fetch_assoc();
-            $correct_answers = $result_correct['correct_answers'];
-            $stmt_correct->close();
+            if(isset($_SESSION['userId'])){
+                $stmt_correct = $conn->prepare("SELECT COUNT(*) AS correct_answers FROM user_responses WHERE user_id = ? AND test_id = ? AND is_correct = 1");
+                $stmt_correct->bind_param('ii', $_SESSION['userId'], $row['id']);
+                $stmt_correct->execute();
+                $result_correct = $stmt_correct->get_result()->fetch_assoc();
+                $correct_answers = $result_correct['correct_answers'];
+                $stmt_correct->close();
+            }
             ?>
             <div class="border border-slate-100 p-3 mb-2 bg-white rounded-sm shadow-sm w-1/2 flex justify-between items-center">
                <div>
                     <h1 class="text-lg font-medium"><?php echo htmlspecialchars($row['title']); ?></h1>
                     <?php
-                        if(in_array($row['id'],$completed_tests)){
+                       if(isset($_SESSION['userId'])){
+                         if(in_array($row['id'],$completed_tests)){
                             echo '<h1>Score:&nbsp;<span class="font-medium text-green-600 text-lg">'.$correct_answers.'</span>&nbsp;/&nbsp;'.$total_questions.'</h1>';
                         }
+                       }
 
                     ?>
                     <h2>Start time: <span class="ml-1"><?php echo htmlspecialchars($start_time); ?></span></h2>
