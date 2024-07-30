@@ -15,6 +15,13 @@
         $dataToDecrypt = $en_data;
         $decryptedData = openssl_decrypt($dataToDecrypt, $cypherMethod, $key, $options=0, $iv);
         return $decryptedData;
+    } 
+
+    function getCurrentUrl() {
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+        $host = $_SERVER['HTTP_HOST'];
+        $uri = $_SERVER['REQUEST_URI'];
+        return urlencode($protocol . "://" . $host . $uri);
     }
 
    
