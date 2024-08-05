@@ -5,9 +5,9 @@
     $database = "quiz";
 
     try {
-        $conn = new mysqli($server_address,$username,$password,$database);
+        $conn = @new mysqli($server_address,$username,$password,$database);
         if($conn->connect_error){
-            echo "Database Connection failed";
+            die("Database Connection failed");
             exit();
         }
     } catch (Exception $e) {
