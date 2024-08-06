@@ -52,18 +52,31 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
 ?>
 <div class="h-screen w-full">
 	<div class="container flex flex-col items-center justify-center gap-5">
-		<h1 class="text-3xl text-center">Login</h1>
-		<div class="bg-white p-2 w-[300px] py-3 rounded-sm">
+		<div class="space-y-2 text-gray-600">
+			<h1 class="text-4xl text-center font-medium">Login to your account.</h1>
+			<p class="text-md text-center">Sign in to start the session</p>
+		</div>
+		<div class="bg-white p-2 w-full py-4 px-6 rounded-lg max-w-md shadow-sm">
 			<form method="post" action="">
 				<div class="space-y-2">
-					<p class="text-sm text-center">Sign in to start the session</p>
-					<?php echo $loginError==true ? '<p class="text-sm text-red-500 text-center">'.$error_message.'</p>' : ''?>
-					<div class="space-y-2 mx-2">
-						<input type="text" placeholder="Username" class="outline-none border pl-1 py-1 rounded-sm w-full" name="username" required/>
-						<input type="password" placeholder="Password" class="outline-none border pl-1 py-1 rounded-sm w-full" name="password" required />
+					<?php echo $loginError==true ? '<p class="text-md text-red-500 text-center font-medium">'.$error_message.'</p>' : ''?>
+					<div class="space-y-4 mx-2 text-gray-600">
+						<div class="space-y-1">
+							<label class="text-[16px] font-medium tracking-wide">Username</label>
+							<input type="text" class="appearance-none block w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-gray-500 focus:border-gray-500" name="username" required autocomplete="off" />
+						</div>
+						<div class="space-y-1">
+							<label class="text-[16px] font-medium tracking-wide">Password</label>
+							<input type="password" class="appearance-none block w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-gray-500 focus:border-gray-500" name="password" required autocomplete="off" />
+						</div>
 					</div>
-					<button class="bg-blue-400 text-white p-1 mx-2 px-2" type="submit">Sign In</button>
 				</div>
+				 <div class="px-2 mt-4">
+                    <button type="submit"
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-md font-medium text-white bg-green-600 hover:bg-green-500 focus:outline-none">
+                        Sign in
+                    </button>
+                </div>
 			</form>
 		</div>
 	</div>

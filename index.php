@@ -30,29 +30,54 @@ if(isset($_SESSION['userId'])){
     $stmt_user->close();
 }
 ?>
-
 <div class="container">
-   <div class="flex items-center justify-between py-5">
+    <div class="fixed right-5 bottom-10 bg-red-400 h-[50px] w-[50px] rounded-full shadow-xl z-5 hidden transition items-center justify-center text-white cursor-pointer" id="scrollToTop" onclick="scrollToTop()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+    </div>
+ <div class="flex items-center justify-between py-5">
     <h1 class="text-center text-4xl font-medium text-gray-600">Quiz App</h1>
-    <?php
-    if(isset($_SESSION['userId'])){
-        echo '<a class="bg-red-400 hover:bg-red-500 px-5 py-2 text-white rounded-md font-medium" href="logout.php">Logout</a>';
-    }
-    else
-    {
-        echo '<a class="bg-red-400 hover:bg-red-500 px-5 py-2 text-white rounded-md font-medium" href="login.php">Login</a>';
-    }
+    <div class="flex items-center gap-3">
+        <?php if(isset($_SESSION['userId'])):?>
+            <div>
+                <h1 class="text-xl text-gray-600">Welcome,&nbsp;<span class="font-medium"><?php echo $_SESSION['username'];?></span></h1>
+            </div>
+        <?php endif;?>
+        <?php
+        if(isset($_SESSION['userId'])){
+            echo '<a class="bg-red-400 hover:bg-red-500 px-5 py-2 text-white rounded-md font-medium" href="logout.php">Logout</a>';
+        }
+        else
+        {
+            echo '<a class="bg-red-400 hover:bg-red-500 px-5 py-2 text-white rounded-md font-medium" href="login.php">Login</a>';
+        }
 
-    ?>
+        ?>
+    </div>
 </div>
 <div class="mt-5 space-y-5">
     <!-- <h1 class="text-center text-xl">No tests</h1> -->
     <?php
     while($row = $result->fetch_assoc()){
-        $start_time = $row['start_time'];
-        $end_time = $row['end_time'];
-        $is_active = $current_time >= $start_time && $current_time <= $end_time;
-        $is_completed = $current_time > $end_time || ( isset($_SESSION['userId']) && in_array($row['id'], $completed_tests));
+        $s_time = $row['start_time'];
+        $e_time = $row['end_time'];
+        $start_parts = explode(" ", $s_time);
+        $start_date = $start_parts[0];
+        $start_time = $start_parts[1];
+        $start_date_parts = explode('-', $start_date);
+        $start_date_reversed = array_reverse($start_date_parts);
+        $start_time = implode('-', $start_date_reversed).' '.$start_time;
+
+        $end_parts = explode(" ", $e_time);
+        $end_date = $end_parts[0];
+        $end_time = $end_parts[1];
+        $end_date_parts = explode('-', $end_date);
+        $end_date_reversed = array_reverse($end_date_parts);
+        $end_time = implode('-', $end_date_reversed).' '.$end_time;
+
+
+
+        $is_active = $current_time >= $row['start_time'] && $current_time <= $row['end_time'];
+        $is_completed = $current_time > $row['end_time'] || ( isset($_SESSION['userId']) && in_array($row['id'], $completed_tests));
 
         $stmt_q = $conn->prepare("SELECT COUNT(*) AS total_questions FROM questions WHERE test_id=?");
         $stmt_q->bind_param('i',$row['id']);
@@ -70,15 +95,17 @@ if(isset($_SESSION['userId'])){
         }
         ?>
         <div class="bg-white rounded-lg shadow-xl overflow-hidden">
-         <div class="px-4 py-5 flex justify-between items-center border-b border-slate-200">
-            <h1 class="text-xl font-medium"><?php echo htmlspecialchars($row['title']); ?></h1>
-            <?php
-            if(isset($_SESSION['userId'])){
-               if(in_array($row['id'],$completed_tests)){
-                echo '<h1>Score:&nbsp;<span class="font-medium text-green-600 text-lg">'.$correct_answers.'</span>&nbsp;/&nbsp;'.$total_questions.'</h1>';
+           <div class="px-4 py-5 flex justify-between items-center border-b border-slate-200">
+            <div class="space-y-1">
+                <h1 class="text-xl font-medium"><?php echo htmlspecialchars($row['title']); ?></h1>
+                <?php
+                if(isset($_SESSION['userId'])){
+                 if(in_array($row['id'],$completed_tests)){
+                    echo '<h1>Score:&nbsp;<span class="font-medium text-green-500 text-xl">'.$correct_answers.'</span>&nbsp;/&nbsp;'.$total_questions.'</h1>';
+                }
             }
-        }
-        ?>
+            ?>
+        </div>
         <div class="flex items-center gap-3">
             <?php echo $is_completed ? '<img src="assets/lock.png" alt="lock" class="h-5 w-5 mt-2">' :'';?>
             <button 
@@ -86,7 +113,7 @@ if(isset($_SESSION['userId'])){
             <?php if(!$is_active) echo 'disabled'; ?> 
             <?php if($is_active) echo 'onClick="window.location.href=\'take_quiz.php?quizId=' . encrypt_data($row['id']) . '\'"'; ?>
             >
-            <?php echo $is_completed ? 'Completed' : 'Take Test'; ?>
+            <?php echo $is_completed ? 'Completed' : 'Take the Test'; ?>
         </button>
     </div>
 </div>
