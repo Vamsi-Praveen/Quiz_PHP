@@ -146,6 +146,21 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
 
         totalQ.textContent = totalQuestions;
 
+        const documentTitle = document.title;
+        let submitTimer;
+        //visibilty API
+        document.addEventListener('visibilitychange',function(){
+            if(document.hidden){
+                document.title = 'Please Come back...'
+                submitTimer = setTimeout(function(){
+                    submittest();
+                },3000)
+            }else{
+                clearTimeout(submitTimer)
+                document.title = documentTitle;
+            }
+        })
+
         function parseTime(time){
             const hours = parseInt(time.split(':')[0]);
             const minutes = parseInt(time.split(':')[1]);
