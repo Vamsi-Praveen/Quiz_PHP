@@ -79,7 +79,7 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
     }
 
     ?>
-    <div class="h-screen w-full flex items-center justify-center flex-col gap-8">
+   <!--  <div class="h-screen w-full flex items-center justify-center flex-col gap-8">
         <h1 class="text-4xl font-medium text-gray-600"><?php echo htmlspecialchars($result['title'])?></h1>
         <div class="min-h-[350px] w-[90%] flex gap-10">
             <div class="flex-1 bg-white rounded-lg shadow-xl p-4 flex flex-col justify-between">
@@ -128,7 +128,58 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
 
             <a class="bg-red-400 text-white px-4 rounded-md py-2 mt-3 inline-block" href="index.php">Continue</a>
         </div>
+    </div> -->
+    <div class="min-h-screen w-full flex items-center justify-center flex-col gap-4 p-4">
+    <h1 class="text-2xl md:text-4xl font-medium text-gray-600 text-center"><?php echo htmlspecialchars($result['title'])?></h1>
+    <div class="md:w-[95%] flex flex-col lg:flex-row md:gap-6 gap-5">
+        <div class="flex-1 bg-white rounded-lg shadow-xl p-4 flex flex-col justify-between">
+            <div id="question-container">
+                <?php foreach(array_values($questions) as $index=>$question):?>
+                    <div class="question" id="question-<?php echo $index?>" style="display: <?php echo $index==0? 'block' :'none'?>;">
+                        <strong class="text-lg md:text-xl font-semibold text-gray-800 mb-4 block"><?php echo ($index+1).". ".htmlspecialchars($question['question_text'])?></strong>
+                        <div class="options mt-3 flex flex-col gap-2">
+                            <?php foreach($question['options'] as $option):?>
+                                <label class="flex items-center bg-gray-50 rounded-lg p-3 space-x-2 transition hover:bg-gray-100 cursor-pointer">
+                                    <input type="radio" name="answer-<?php echo $question['id']?>" value="<?php echo $option['id']?>" class="w-4 h-4">
+                                    <span class="text-sm md:text-base text-gray-700"><?php echo htmlspecialchars($option['text'])?></span>
+                                </label>
+                            <?php endforeach;?>
+                        </div>
+                    </div>
+                <?php endforeach;?>
+            </div>
+            <div class="mt-4 space-x-3 flex justify-center md:justify-start">
+                <button class="text-white bg-green-400 transition hover:bg-green-500 font-semibold py-2 px-4 rounded-lg text-sm md:text-base" onclick="previousQuestion()">Previous</button>
+                <button class="text-white bg-green-400 transition hover:bg-green-500 font-semibold py-2 px-4 rounded-lg text-sm md:text-base" onclick="saveAndNext()">Save and Next</button>
+            </div>
+        </div>
+        <div class="w-full lg:w-[30%] bg-white rounded-lg p-4 shadow-xl flex flex-col justify-between">
+           <div>
+            <div class="border-b border-slate-200 pb-2 mb-2">
+                <p class="text-red-500 font-medium">Time Remaining</p>
+                <h2 class="text-2xl md:text-4xl font-medium" id="timer">00:00:00</h2>
+            </div>
+            <div class="question-grid grid grid-cols-5 gap-2">
+                <?php foreach(array_values($questions) as $index=>$question):?>
+                    <button class="bg-gray-100 px-1 py-1.5 rounded-md hover:bg-gray-200 transition font-medium text-sm" id="q-nav-<?php echo $index?>" onclick="showQuestion(<?php echo $index?>)"><?php echo $index+1?></button>
+                <?php endforeach;?>
+            </div>
+        </div>
+        <div class="self-end mt-2">
+            <button class="bg-red-500 text-white px-3 py-2 rounded-lg transition hover:bg-red-600 w-full text-sm md:text-base" onclick="submittest()">Submit</button>
+        </div>
     </div>
+</div>
+<div class="fixed inset-0 bg-black hidden bg-opacity-60 flex items-center justify-center transition-opacity duration-300" id="scoremodal">
+    <div class="bg-white w-[90%] max-w-md p-3 rounded-lg shadow-xl text-center">
+        <img src="./assets/trophy.png" class="object-cover h-[200px] w-[200px] mx-auto">
+        <h1 class="text-2xl md:text-3xl font-medium">Test Score</h1>
+        <div role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" style="--value: 33"></div>
+        <h2 class="text-xl mt-2"><span class="text-2xl font-medium text-green-600" id="score">0</span>&nbsp;/&nbsp;<span id="totalQ">0</span></h2>
+
+        <a class="bg-red-400 text-white px-4 rounded-md py-2 mt-3 inline-block text-sm md:text-base" href="index.php">Continue</a>
+    </div>
+</div>
     <script>
         var currentQuestion = 0;
         const totalQuestions = <?php echo count($questions);?>;
@@ -149,17 +200,17 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
         const documentTitle = document.title;
         let submitTimer;
         //visibilty API
-        document.addEventListener('visibilitychange',function(){
-            if(document.hidden){
-                document.title = 'Please Come back...'
-                submitTimer = setTimeout(function(){
-                    submittest();
-                },3000)
-            }else{
-                clearTimeout(submitTimer)
-                document.title = documentTitle;
-            }
-        })
+        // document.addEventListener('visibilitychange',function(){
+        //     if(document.hidden){
+        //         document.title = 'Please Come back...'
+        //         submitTimer = setTimeout(function(){
+        //             submittest();
+        //         },3000)
+        //     }else{
+        //         clearTimeout(submitTimer)
+        //         document.title = documentTitle;
+        //     }
+        // })
 
         function parseTime(time){
             const hours = parseInt(time.split(':')[0]);
@@ -195,6 +246,9 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
                 if(this.readyState==4 && this.status==200){
                     score.textContent = this.responseText;
                     modal.classList.remove('hidden');
+                     if (parseInt(this.responseText) >= totalQuestions / 2) {
+                        startSchoolPrideConfetti();
+                    }
                 }
             }
             xhr.send(`testId=<?php echo $quizId?>&action=FETCH`)

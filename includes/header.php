@@ -6,5 +6,6 @@
     <title><?php echo isset($title) ? $title : "Quiz"?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body class="bg-gray-100">

@@ -1,4 +1,5 @@
-<!-- <script>
+<div id="tsparticles"></div>
+<script>
       document.addEventListener('contextmenu',function(e){
         e.preventDefault();
     })
@@ -7,7 +8,9 @@
           e.preventDefault();
         }
       })
-</script> -->
+</script>
+<script src="https://cdn.jsdelivr.net/npm/tsparticles@2.9.3/tsparticles.bundle.min.js"></script>
 <script src="js/script.js"></script>
+<script src="js/confetti.js"></script>
 </body>
 </html>
