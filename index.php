@@ -35,7 +35,7 @@ if(isset($_SESSION['userId'])){
             <?php if(isset($_SESSION['userId'])): ?>
                 <div class="flex items-center gap-2">
                     <img src="./assets/coin.png" class="object-cover w-8 h-8">
-                    <h1 class="text-xl text-gray-600">10</h1>
+                    <h1 class="text-xl text-gray-600"><?php echo $_SESSION['points']?></h1>
                 </div>
                <!--  <div>
                     <h1 class="text-lg md:text-xl text-gray-600">Welcome, <span class="font-medium"><?php echo $_SESSION['username']; ?></span></h1>
@@ -89,46 +89,48 @@ if(isset($_SESSION['userId'])){
                 $stmt_correct->close();
             }
             ?>
-            <div class="bg-white rounded-lg shadow-xl overflow-hidden">
-                <div class="px-4 py-5 flex justify-between items-center border-b border-slate-200">
-                    <div class="space-y-1">
-                        <h1 class="text-xl font-medium"><?php echo htmlspecialchars($row['title']); ?></h1>
-                        <?php
-                        if(isset($_SESSION['userId'])){
-                            if(in_array($row['id'], $completed_tests)){
-                                echo '<h1>Score: <span class="font-medium text-green-500 text-xl">'.$correct_answers.'</span> / '.$total_questions.'</h1>';
+            <div class="rounded-lg shadow-md overflow-hidden hover:shadow-lg hover:scale-2 border border-transparent hover:border-slate-300 transition">
+                <div class="bg-white ">
+                    <div class="px-4 py-5 flex justify-between items-center border-b border-slate-200">
+                        <div class="space-y-1">
+                            <h1 class="text-xl font-medium"><?php echo htmlspecialchars($row['title']); ?></h1>
+                            <?php
+                            if(isset($_SESSION['userId'])){
+                                if(in_array($row['id'], $completed_tests)){
+                                    echo '<h1>Score: <span class="font-medium text-green-500 text-xl">'.$correct_answers.'</span> / '.$total_questions.'</h1>';
+                                }
                             }
-                        }
-                        ?>
+                            ?>
+                        </div>
+                        <div class="flex md:items-center items-end gap-3 flex-col md:flex-row">
+                            <?php echo $is_completed ? '<img src="assets/lock.png" alt="lock" class="h-5 w-5 mt-2">' : ''; ?>
+                            <button 
+                            class="<?php echo $is_active && !$is_completed ? 'bg-green-500 hover:bg-green-600' : 'bg-red-400 cursor-not-allowed'; ?> text-white font-medium py-2 px-4 rounded transition"
+                            <?php if(!$is_active) echo 'disabled'; ?> 
+                            <?php if($is_active && !$is_completed) echo 'onClick="window.location.href=\'take_quiz.php?quizId=' . encrypt_data($row['id']) . '\'"'; ?>
+                            >
+                            <?php echo $is_completed ? 'Completed' : 'Take the Test'; ?>
+                        </button>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <?php echo $is_completed ? '<img src="assets/lock.png" alt="lock" class="h-5 w-5 mt-2">' : ''; ?>
-                        <button 
-                        class="<?php echo $is_active && !$is_completed ? 'bg-green-500 hover:bg-green-600' : 'bg-red-400 cursor-not-allowed'; ?> text-white font-medium py-2 px-4 rounded transition"
-                        <?php if(!$is_active) echo 'disabled'; ?> 
-                        <?php if($is_active) echo 'onClick="window.location.href=\'take_quiz.php?quizId=' . encrypt_data($row['id']) . '\'"'; ?>
-                        >
-                        <?php echo $is_completed ? 'Completed' : 'Take the Test'; ?>
-                    </button>
                 </div>
-            </div>
-            <div class="border-t border-gray-200">
-                <dl>
-                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                        <dt class="text-sm font-medium text-gray-500">Start time</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><?php echo htmlspecialchars($start_time); ?></dd>
-                    </div>
-                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                        <dt class="text-sm font-medium text-gray-500">End time</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><?php echo htmlspecialchars($end_time); ?></dd>
-                    </div>
-                </dl>
+                <div class="border-t border-gray-200">
+                    <dl>
+                        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">Start time</dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><?php echo htmlspecialchars($start_time); ?></dd>
+                        </div>
+                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm font-medium text-gray-500">End time</dt>
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"><?php echo htmlspecialchars($end_time); ?></dd>
+                        </div>
+                    </dl>
+                </div>
             </div>
         </div>
         <?php
-        }
-        ?>
-    </div>
+    }
+    ?>
+</div>
 </div>
 
 <?php include('./includes/footer.php'); ?>

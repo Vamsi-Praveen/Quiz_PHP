@@ -129,7 +129,10 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
             <a class="bg-red-400 text-white px-4 rounded-md py-2 mt-3 inline-block" href="index.php">Continue</a>
         </div>
     </div> -->
-    <div class="min-h-screen w-full flex items-center justify-center flex-col gap-4 p-4">
+    <div class="min-h-screen w-full flex items-center justify-center flex-col gap-10 p-4">
+         <div class="fixed right-5 bottom-10 bg-red-400 h-[50px] w-[50px] rounded-full shadow-xl z-5 hidden transition items-center justify-center text-white cursor-pointer" id="scrollToTop" onclick="scrollToTop()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+    </div>
     <h1 class="text-2xl md:text-4xl font-medium text-gray-600 text-center"><?php echo htmlspecialchars($result['title'])?></h1>
     <div class="md:w-[95%] flex flex-col lg:flex-row md:gap-6 gap-5">
         <div class="flex-1 bg-white rounded-lg shadow-xl p-4 flex flex-col justify-between">
@@ -172,9 +175,8 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
 </div>
 <div class="fixed inset-0 bg-black hidden bg-opacity-60 flex items-center justify-center transition-opacity duration-300" id="scoremodal">
     <div class="bg-white w-[90%] max-w-md p-3 rounded-lg shadow-xl text-center">
-        <img src="./assets/trophy.png" class="object-cover h-[200px] w-[200px] mx-auto">
+        <img src="./assets/trophy.png" class="object-cover h-[200px] w-[200px] mx-auto" id="res_image">
         <h1 class="text-2xl md:text-3xl font-medium">Test Score</h1>
-        <div role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" style="--value: 33"></div>
         <h2 class="text-xl mt-2"><span class="text-2xl font-medium text-green-600" id="score">0</span>&nbsp;/&nbsp;<span id="totalQ">0</span></h2>
 
         <a class="bg-red-400 text-white px-4 rounded-md py-2 mt-3 inline-block text-sm md:text-base" href="index.php">Continue</a>
@@ -188,29 +190,34 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
 
         var questions = <?php echo json_encode(array_values($questions)); ?>;
 
+        var isSubmitted = false;
+
 
 
         const timer = document.getElementById('timer');
         const score = document.getElementById('score');
         const totalQ = document.getElementById('totalQ');
         const modal = document.getElementById('scoremodal');
+        const res_image = document.getElementById('res_image');
 
         totalQ.textContent = totalQuestions;
 
         const documentTitle = document.title;
         let submitTimer;
-        //visibilty API
-        // document.addEventListener('visibilitychange',function(){
-        //     if(document.hidden){
-        //         document.title = 'Please Come back...'
-        //         submitTimer = setTimeout(function(){
-        //             submittest();
-        //         },3000)
-        //     }else{
-        //         clearTimeout(submitTimer)
-        //         document.title = documentTitle;
-        //     }
-        // })
+        // visibilty API
+        document.addEventListener('visibilitychange',function(){
+            if(document.hidden){
+                document.title = 'Please Come back...'
+                submitTimer = setTimeout(function(){
+                    if(!isSubmitted){
+                        submittest();
+                    }
+                },3000)
+            }else{
+                clearTimeout(submitTimer)
+                document.title = documentTitle;
+            }
+        })
 
         function parseTime(time){
             const hours = parseInt(time.split(':')[0]);
@@ -244,10 +251,20 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
             xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
             xhr.onreadystatechange = function(){
                 if(this.readyState==4 && this.status==200){
+                    isSubmitted = true;
                     score.textContent = this.responseText;
                     modal.classList.remove('hidden');
                      if (parseInt(this.responseText) >= totalQuestions / 2) {
+                        res_image.src = './assets/trophy.png';
                         startSchoolPrideConfetti();
+                    }
+                    else
+                    {
+                        res_image.src = "./assets/sad.png";
+                        res_image.classList.remove('w-[200px]');
+                        res_image.classList.remove('h-[200px]');
+                        res_image.classList.add('h-[140px]');
+                        res_image.classList.add('h-[140px]');
                     }
                 }
             }
