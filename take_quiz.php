@@ -130,11 +130,11 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
         </div>
     </div> -->
     <div class="min-h-screen w-full flex items-center justify-center flex-col gap-10 p-4">
-         <div class="fixed right-5 bottom-10 bg-red-400 h-[50px] w-[50px] rounded-full shadow-xl z-5 hidden transition items-center justify-center text-white cursor-pointer" id="scrollToTop" onclick="scrollToTop()">
+       <div class="fixed right-5 bottom-10 bg-red-400 h-[50px] w-[50px] rounded-full shadow-xl z-5 hidden transition items-center justify-center text-white cursor-pointer" id="scrollToTop" onclick="scrollToTop()">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
     </div>
     <h1 class="text-2xl md:text-4xl font-medium text-gray-600 text-center"><?php echo htmlspecialchars($result['title'])?></h1>
-    <div class="md:w-[95%] flex flex-col lg:flex-row md:gap-6 gap-5">
+    <div class="md:w-[95%] flex flex-col lg:flex-row md:gap-6 gap-5 w-full">
         <div class="flex-1 bg-white rounded-lg shadow-xl p-4 flex flex-col justify-between">
             <div id="question-container">
                 <?php foreach(array_values($questions) as $index=>$question):?>
@@ -157,7 +157,7 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
             </div>
         </div>
         <div class="w-full lg:w-[30%] bg-white rounded-lg p-4 shadow-xl flex flex-col justify-between">
-           <div>
+         <div>
             <div class="border-b border-slate-200 pb-2 mb-2">
                 <p class="text-red-500 font-medium">Time Remaining</p>
                 <h2 class="text-2xl md:text-4xl font-medium" id="timer">00:00:00</h2>
@@ -182,28 +182,28 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
         <a class="bg-red-400 text-white px-4 rounded-md py-2 mt-3 inline-block text-sm md:text-base" href="index.php">Continue</a>
     </div>
 </div>
-    <script>
-        var currentQuestion = 0;
-        const totalQuestions = <?php echo count($questions);?>;
+<script>
+    var currentQuestion = 0;
+    const totalQuestions = <?php echo count($questions);?>;
 
-        var time_remaining = "<?php echo $time_remaining;?>";
+    var time_remaining = "<?php echo $time_remaining;?>";
 
-        var questions = <?php echo json_encode(array_values($questions)); ?>;
+    var questions = <?php echo json_encode(array_values($questions)); ?>;
 
-        var isSubmitted = false;
+    var isSubmitted = false;
 
 
 
-        const timer = document.getElementById('timer');
-        const score = document.getElementById('score');
-        const totalQ = document.getElementById('totalQ');
-        const modal = document.getElementById('scoremodal');
-        const res_image = document.getElementById('res_image');
+    const timer = document.getElementById('timer');
+    const score = document.getElementById('score');
+    const totalQ = document.getElementById('totalQ');
+    const modal = document.getElementById('scoremodal');
+    const res_image = document.getElementById('res_image');
 
-        totalQ.textContent = totalQuestions;
+    totalQ.textContent = totalQuestions;
 
-        const documentTitle = document.title;
-        let submitTimer;
+    const documentTitle = document.title;
+    let submitTimer;
         // visibilty API
         document.addEventListener('visibilitychange',function(){
             if(document.hidden){
@@ -253,8 +253,9 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
                 if(this.readyState==4 && this.status==200){
                     isSubmitted = true;
                     score.textContent = this.responseText;
+                    var scoreValue = parseInt(this.responseText);
                     modal.classList.remove('hidden');
-                     if (parseInt(this.responseText) >= totalQuestions / 2) {
+                    if (scoreValue >= totalQuestions / 2) {
                         res_image.src = './assets/trophy.png';
                         startSchoolPrideConfetti();
                     }
@@ -266,48 +267,70 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
                         res_image.classList.add('h-[140px]');
                         res_image.classList.add('h-[140px]');
                     }
-                }
-            }
-            xhr.send(`testId=<?php echo $quizId?>&action=FETCH`)
-        }
-
-        function showQuestion(index) {
-            document.querySelectorAll('.question').forEach(question => question.style.display = 'none');
-            document.getElementById(`question-${index}`).style.display = 'block';
-            currentQuestion = index;
-        }
-
-        function saveAndNext() {
-            const selectedQuestion = document.getElementById(`question-${currentQuestion}`);
-            const selectedOption = selectedQuestion.querySelector('input[type="radio"]:checked');
-            if(selectedOption){
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST','quiz_ajax.php',true);
-                xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-                xhr.onreadystatechange = function(){
-                    if(xhr.readyState==4 && xhr.status ==200){
-                        console.log('answer saved');
+                    var percentage = (scoreValue / totalQuestions) * 100;
+                    if (percentage >= 85) {
+                        updateUserPoints(5);
+                    } else if (percentage >= 60) {
+                        updateUserPoints(3);
+                    } else if (percentage < 30) {
+                        updateUserPoints(1);
                     }
-                }
-                xhr.send(`questionId=${questions[currentQuestion]?.id}&selectedOptionId=${selectedOption.value}&testId=<?php echo $quizId?>&action=INSERT`)
-                document.getElementById(`q-nav-${currentQuestion}`).classList.remove('bg-gray-200');
-                document.getElementById(`q-nav-${currentQuestion}`).classList.remove('hover:bg-gray-300');
-                document.getElementById(`q-nav-${currentQuestion}`).classList.add('bg-green-400');
-                document.getElementById(`q-nav-${currentQuestion}`).classList.add('hover:bg-green-500');
-                document.getElementById(`q-nav-${currentQuestion}`).classList.add('text-white');
-            }
-            if (currentQuestion < totalQuestions-1) {
-                showQuestion(currentQuestion + 1);
+        }
+    }
+    xhr.send(`testId=<?php echo $quizId?>&action=FETCH`)
+}
+
+function updateUserPoints(points){
+    var xhrUpdatePoints = new XMLHttpRequest();
+    xhrUpdatePoints.open('POST', 'update_points.php', true); // Ensure you have an endpoint to update points
+    xhrUpdatePoints.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+    xhrUpdatePoints.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            console.log('Points updated successfully');
+        }
+    };
+
+    xhrUpdatePoints.send(`userId=<?php echo $_SESSION['userId']; ?>&points=${points}`);
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.question').forEach(question => question.style.display = 'none');
+    document.getElementById(`question-${index}`).style.display = 'block';
+    currentQuestion = index;
+}
+
+function saveAndNext() {
+    const selectedQuestion = document.getElementById(`question-${currentQuestion}`);
+    const selectedOption = selectedQuestion.querySelector('input[type="radio"]:checked');
+    if(selectedOption){
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST','quiz_ajax.php',true);
+        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState==4 && xhr.status ==200){
+                console.log('answer saved');
             }
         }
+        xhr.send(`questionId=${questions[currentQuestion]?.id}&selectedOptionId=${selectedOption.value}&testId=<?php echo $quizId?>&action=INSERT`)
+        document.getElementById(`q-nav-${currentQuestion}`).classList.remove('bg-gray-200');
+        document.getElementById(`q-nav-${currentQuestion}`).classList.remove('hover:bg-gray-300');
+        document.getElementById(`q-nav-${currentQuestion}`).classList.add('bg-green-400');
+        document.getElementById(`q-nav-${currentQuestion}`).classList.add('hover:bg-green-500');
+        document.getElementById(`q-nav-${currentQuestion}`).classList.add('text-white');
+    }
+    if (currentQuestion < totalQuestions-1) {
+        showQuestion(currentQuestion + 1);
+    }
+}
 
-        function previousQuestion() {
-            if (currentQuestion > 0) {
-                showQuestion(currentQuestion - 1);
-            }
-        }
+function previousQuestion() {
+    if (currentQuestion > 0) {
+        showQuestion(currentQuestion - 1);
+    }
+}
 
-    </script>
-    <?php
-    include('./includes/footer.php');
+</script>
+<?php
+include('./includes/footer.php');
 ?>

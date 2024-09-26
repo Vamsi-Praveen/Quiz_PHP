@@ -16,12 +16,13 @@ $result = $stmt->get_result();
 $stmt->close();
 
 if(isset($_SESSION['userId'])){
-    $stmt_user = $conn->prepare("SELECT completed_tests FROM user WHERE id = ?");
+    $stmt_user = $conn->prepare("SELECT completed_tests,points FROM user WHERE id = ?");
     $stmt_user->bind_param('i', $_SESSION['userId']);
     $stmt_user->execute();
     $result_user = $stmt_user->get_result();
     $user_data = $result_user->fetch_assoc();
     $completed_tests = json_decode($user_data['completed_tests'], true) ?? [];
+    $_SESSION['points'] = $user_data['points']  ?? 0;
     $stmt_user->close();
 }
 ?>
@@ -29,7 +30,7 @@ if(isset($_SESSION['userId'])){
     <div class="fixed right-5 bottom-10 bg-red-400 h-[50px] w-[50px] rounded-full shadow-xl z-5 hidden transition items-center justify-center text-white cursor-pointer" id="scrollToTop" onclick="scrollToTop()">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
     </div>
-    <div class="w-full flex flex-col md:flex-row items-center justify-between py-5">
+    <div class="w-full flex flex-row items-center justify-between py-5">
         <h1 class="text-center text-3xl md:text-4xl font-medium text-gray-600">Quiz App</h1>
         <div class="flex items-center gap-5 mt-4 md:mt-0">
             <?php if(isset($_SESSION['userId'])): ?>

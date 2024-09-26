@@ -28,7 +28,6 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
 		if(password_verify($password, $dbPassword)){
 			$_SESSION['username'] = $username;
 			$_SESSION['userId'] = $res['ID'];
-			$_SESSION['points'] = $res['points'];
 
 			if(isset($_GET['redirect'])){
 				$redirectUrl = urldecode(mysqli_real_escape_string($conn,$_GET['redirect']));
