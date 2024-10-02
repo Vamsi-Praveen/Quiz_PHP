@@ -54,6 +54,7 @@ if(isset($_SESSION['userId'])){
         </div>
     </div>
     <div class="mt-5 space-y-5">
+        <?php if($result->num_rows>0):?>
         <?php
         while($row = $result->fetch_assoc()){
             $s_time = $row['start_time'];
@@ -131,6 +132,11 @@ if(isset($_SESSION['userId'])){
         <?php
     }
     ?>
+     <?php else:?>
+            <div class="text-center text-2xl text-gray-600 min-h-[400px]">
+                No tests available
+            </div>
+        <?php endif; ?>
 </div>
 </div>
 
