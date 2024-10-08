@@ -1,0 +1,37 @@
+version: '3.0'
+services:
+  php_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - database
+    ports:
+      - "80:80"
+    volumes:
+      - ./app:/var/www/html
+    networks:
+      - php_app_network
+    restart: always
+
+  database:
+    image: mysql:8.0
+    container_name: database
+    ports:
+      - "3306:3306"
+    volumes:
+      - /root/mysql:/var/lib/mysql  #mounting volume 
+      - ./quiz.sql:/docker-entrypoint-initdb.d/quiz.sql #specfying the start script
+    networks:
+      - php_app_network
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+
+networks:
+  php_app_network:
+    driver: bridge
+
