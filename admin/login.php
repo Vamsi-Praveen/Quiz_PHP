@@ -1,7 +1,8 @@
 <?php
 session_start();
 if(isset($_SESSION['adminID'])){
-    header("location:index.php");
+    // header("location:index.php");
+    echo "<script>window.location.href='index.php'</script>";
 }
 $title="Login";
 include('../includes/header.php');
@@ -26,7 +27,7 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
         if(password_verify($password, $dbPassword)){
             $_SESSION['adminUsername'] = $username;
             $_SESSION['adminID'] = $res['ID'];
-            header('location: index.php');
+            echo "<script>window.location.href='index.php'</script>";
             exit();
         } else {
             $loginError = true;

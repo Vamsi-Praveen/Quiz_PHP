@@ -3,7 +3,8 @@ session_start();
 include('../config/db.php');
 
 if (!(isset($_SESSION['adminID']))) {
-    header("Location: login.php");
+    // header("Location: login.php");
+    echo "<script>window.location.href='login.php'</script>";
     exit();
 }
 
@@ -12,22 +13,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $stmt = $conn->prepare("
         SELECT 
-            u.username,
-            (SELECT COUNT(*) FROM questions WHERE test_id = ?) AS total_questions,
-            COUNT(ur.is_correct) AS total_responses,
-            SUM(ur.is_correct) AS correct_answers
+        u.username,
+        (SELECT COUNT(*) FROM questions WHERE test_id = ?) AS total_questions,
+        COUNT(ur.is_correct) AS total_responses,
+        IFNULL(SUM(ur.is_correct), 0) AS correct_answers
         FROM 
-            user u
+        user u
         JOIN 
-            user_responses ur ON u.id = ur.user_id
+        user_responses ur ON u.id = ur.user_id
         WHERE 
-            ur.test_id = ? AND
-            JSON_CONTAINS(u.completed_tests,?,'$')
+        ur.test_id = ? AND
+        JSON_CONTAINS(u.completed_tests,?,'$')
         GROUP BY 
-            u.username
+        u.username
         ORDER BY 
-            u.username
-    ");
+        u.username
+        ");
     $testIdString = json_encode((string)$testId);
     $stmt->bind_param('iis', $testId,$testId,$testIdString);  
     $stmt->execute();
@@ -46,25 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body class="bg-gray-100">
     <div class="min-h-screen w-full flex flex-col lg:flex-row">
         <!-- Sidebar -->
-        <div class="sidebar w-full lg:w-[20%] bg-[#222d32] text-white flex flex-col">
-            <div class="text-center bg-blue-400 py-3">
-                <a href="index.php" class="font-medium text-xl text-center">ADMIN PANEL</a>
-            </div>
-            <ul class="mt-3 space-y-2 flex-1">
-                <a href="add.php">
-                    <li class="border-b border-[#2d3c42] cursor-pointer hover:bg-[#2d3c42] py-2 pl-2">Add New Test</li>
-                </a>
-                <a href="addusers.php">
-                    <li class="border-b border-[#2d3c42] cursor-pointer hover:bg-[#2d3c42] py-2 pl-2">Add Users</li>
-                </a>
-                <a href="genreport.php">
-                    <li class="border-b border-[#2d3c42] cursor-pointer hover:bg-[#2d3c42] py-2 pl-2">Generate Report</li>
-                </a>
-            </ul>
-            <div class="mx-2 my-4">
-                <a class="bg-red-400 px-3 py-2 rounded hover:bg-red-500 transition duration-150" href="logout.php">Logout</a>
-            </div>
-        </div>
+        <?php include('./includes/sidebar.php')?>
 
         <!-- Main Content -->
         <div class="content flex-1 bg-[#ecf0f5] p-4 lg:p-8">
@@ -78,13 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <select name="test_id" class="border w-full p-2 rounded-lg" required>
                                 <option value="">--------SELECT TEST-------</option>
                                 <?php
-                                    $stmt = $conn->prepare("SELECT * FROM tests");
-                                    $stmt->execute();
-                                    $res = $stmt->get_result();
+                                $stmt = $conn->prepare("SELECT * FROM tests");
+                                $stmt->execute();
+                                $res = $stmt->get_result();
 
-                                    while($row = $res->fetch_assoc()) {
-                                        echo '<option value="' . htmlspecialchars($row['id']) . '">' . htmlspecialchars($row['title']) . '</option>';
-                                    }
+                                while($row = $res->fetch_assoc()) {
+                                    echo '<option value="' . htmlspecialchars($row['id']) . '">' . htmlspecialchars($row['title']) . '</option>';
+                                }
                                 ?>
                             </select>
                         </div>
@@ -108,15 +91,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         <th class="px-4 py-2 text-left">Correct Answers</th>
                                     </tr>
                                 </thead>
-                                <tbody class="text-gray-700">
-                                    <?php while ($row = $result->fetch_assoc()): ?>
-                                        <tr class="border-t">
-                                            <td class="px-4 py-2"><?php echo htmlspecialchars($row['username']); ?></td>
-                                            <td class="px-4 py-2"><?php echo $row['total_questions']; ?></td>
-                                            <td class="px-4 py-2"><?php echo $row['total_responses']; ?></td>
-                                            <td class="px-4 py-2"><?php echo $row['correct_answers']; ?></td>
+                                <tbody>
+                                    <?php if ($result->num_rows > 0): ?>
+                                        <?php while ($row = $result->fetch_assoc()): ?>
+                                            <tr>
+                                                <td class="border-b px-4 py-2"><?php echo htmlspecialchars($row['id']); ?></td>
+                                                <td class="border-b px-4 py-2"><?php echo htmlspecialchars($row['title']); ?></td>
+                                                <td class="border-b px-4 py-2"><?php echo htmlspecialchars($row['start_time']); ?></td>
+                                                <td class="border-b px-4 py-2"><?php echo htmlspecialchars($row['end_time']); ?></td>
+                                                <td class="border-b px-4 py-2">
+                                                    <button class="bg-blue-500 text-white p-2 editBtn" data-id="<?php echo htmlspecialchars($row['id']); ?>" data-title="<?php echo htmlspecialchars($row['title']); ?>" data-start="<?php echo htmlspecialchars($row['start_time']); ?>" data-end="<?php echo htmlspecialchars($row['end_time']); ?>">Edit</button>
+                                                    <button class="bg-red-500 text-white deleteBtn p-2" data-id="<?php echo htmlspecialchars($row['id']); ?>">Delete</button>
+                                                </td>
+                                            </tr>
+                                        <?php endwhile; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="5" class="px-4 py-2 text-center">No tests available</td>
                                         </tr>
-                                    <?php endwhile; ?>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>

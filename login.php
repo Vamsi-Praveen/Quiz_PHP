@@ -3,7 +3,8 @@ session_start();
 $title="Login";
 include('./includes/header.php');
 if(isset($_SESSION['userId'])){
-	header('location:index.php');
+	// header('location:index.php');
+	echo "<script>window.location.href='index.php'</script>";
 	exit();
 }
 ?>
@@ -32,10 +33,11 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
 			if(isset($_GET['redirect'])){
 				$redirectUrl = urldecode(mysqli_real_escape_string($conn,$_GET['redirect']));
 				header('location:'.$redirectUrl);
+				echo "<script>window.location.href='".$redirectUrl."'</script>";
 			}
 			else
 			{
-				header('location: index.php');
+				echo "<script>window.location.href='index.php'</script>";
 			}
 			exit();
 		} else {

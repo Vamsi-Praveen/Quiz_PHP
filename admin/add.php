@@ -1,7 +1,8 @@
 <?php
 session_start();
 if (!(isset($_SESSION['adminID']))) {
-    header("Location: login.php");
+    // header("Location: login.php");
+    echo "<script>window.location.href='login.php'</script>";
     exit();
 }
 ?>
@@ -50,25 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body class="bg-gray-100">
     <div class="min-h-screen flex flex-col lg:flex-row">
         <!-- Sidebar -->
-        <div class="sidebar w-full lg:w-[20%] bg-[#222d32] text-white flex flex-col">
-            <div class="text-center bg-blue-400 py-3">
-                <a href="index.php" class="font-medium text-xl">ADMIN PANEL</a>
-            </div>
-            <ul class="mt-3 space-y-2 flex-grow">
-                <li>
-                    <a href="add.php" class="block border-b border-[#2d3c42] hover:bg-[#2d3c42] py-2 px-2">Add New Test</a>
-                </li>
-                <li>
-                    <a href="addusers.php" class="block border-b border-[#2d3c42] hover:bg-[#2d3c42] py-2 px-2">Add Users</a>
-                </li>
-                <li>
-                    <a href="genreport.php" class="block border-b border-[#2d3c42] hover:bg-[#2d3c42] py-2 px-2">Generate Report</a>
-                </li>
-            </ul>
-            <div class="px-4 py-2">
-                <a href="logout.php" class="bg-red-400 px-4 py-2 rounded-md">Logout</a>
-            </div>
-        </div>
+        <?php include('./includes/sidebar.php')?>
 
         <!-- Main Content -->
         <div class="flex-1 bg-[#ecf0f5] p-4 lg:p-6">

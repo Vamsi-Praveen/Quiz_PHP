@@ -1,7 +1,8 @@
 <?php
 session_start();
 if (!(isset($_SESSION['adminID']))) {
-    header("Location: login.php");
+    // header("Location: login.php");
+    echo "<script>window.location.href='login.php'</script>";
     exit();
 }
 ?>
@@ -9,7 +10,17 @@ if (!(isset($_SESSION['adminID']))) {
     include('../config/db.php');
 
     if($_SERVER['REQUEST_METHOD']=='POST'){
-        // Handle form submissions here.
+        $name = $_POST['fullname'];
+        $username = $_POST['username'];
+        $password = $_POST['password'];
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+         $stmt = $conn->prepare("INSERT INTO user (name, username, password) VALUES (?, ?, ?)");
+                $stmt->bind_param('sss', $name,$username,$hashedPassword);
+                if (!$stmt->execute()) {
+                    echo "<script>alert('Error inserting user: " . htmlspecialchars($user['username']) . " - " . $stmt->error . "');</script>";
+                }
+                echo "<script>alert('Added Successfull');</script>";
     }
 ?>
 <!DOCTYPE html>
@@ -23,31 +34,7 @@ if (!(isset($_SESSION['adminID']))) {
 <body class="bg-gray-100">
     <div class="min-h-screen w-full flex flex-col lg:flex-row">
         <!-- Sidebar -->
-        <div class="sidebar w-full lg:w-[20%] bg-[#222d32] text-white flex flex-col">
-            <div class="text-center bg-blue-500 py-4">
-                <a href="index.php" class="font-semibold text-lg">ADMIN PANEL</a>
-            </div>
-            <ul class="mt-6 space-y-1 flex-1">
-                <a href="add.php">
-                    <li class="border-b border-[#2d3c42] cursor-pointer hover:bg-[#2d3c42] py-3 pl-4">
-                        Add New Test
-                    </li>
-                </a>
-                <a href="addusers.php">
-                    <li class="border-b border-[#2d3c42] cursor-pointer hover:bg-[#2d3c42] py-3 pl-4">
-                        Add Users
-                    </li>
-                </a>
-                <a href="genreport.php">
-                    <li class="border-b border-[#2d3c42] cursor-pointer hover:bg-[#2d3c42] py-3 pl-4">
-                        Generate Report
-                    </li>
-                </a>
-            </ul>
-            <div class="mt-auto mb-6 text-center">
-                <a class="bg-red-500 px-4 py-2 rounded text-white hover:bg-red-600 transition duration-150" href="logout.php">Logout</a>
-            </div>
-        </div>
+        <?php include('./includes/sidebar.php')?>
 
         <!-- Main Content -->
         <div class="content flex-1 bg-[#ecf0f5] p-6 flex items-center justify-center">
@@ -58,6 +45,11 @@ if (!(isset($_SESSION['adminID']))) {
                     <!-- Single User Form -->
                     <form class="space-y-6" action="" method="post">
                         <h2 class="text-xl font-medium mb-4">Add Single User</h2>
+
+                        <div class="flex flex-col md:flex-row items-center md:space-x-4 space-y-4 md:space-y-0">
+                            <label class="w-full md:w-1/4 text-gray-700 font-medium">Full Name</label>
+                            <input type="text" name="fullname" class="border w-full md:w-3/4 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
 
                         <div class="flex flex-col md:flex-row items-center md:space-x-4 space-y-4 md:space-y-0">
                             <label class="w-full md:w-1/4 text-gray-700 font-medium">Username</label>

@@ -2,7 +2,8 @@
 session_start();
 include('./utils/functions.php');
 if(!(isset($_SESSION['userId']))){
-    header("location:login.php?redirect=".getCurrentUrl());
+    echo "<script>window.location.href='login.php?redirect=".getCurrentUrl()."'</script>";
+    // header("location:login.php?redirect=".getCurrentUrl());
     exit();
 }
 ?>
@@ -25,7 +26,8 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
     $user_data = $result_user->fetch_assoc();
     $completed_tests = json_decode($user_data['completed_tests'], true) ?? [];
     if(in_array($quizId,$completed_tests)){
-        header("location:index.php");
+        // header("location:index.php");
+        echo "<script>window.location.href='index.php'</script>";
         exit();
     }
     $stmt_user->close();
@@ -73,7 +75,8 @@ if($_SERVER['REQUEST_METHOD']=='GET'){
         }
         else
         {
-            header("location:index.php");
+            // header("location:index.php");
+            echo "<script>window.location.href='index.php'</script>";
             exit();
         }
     }
