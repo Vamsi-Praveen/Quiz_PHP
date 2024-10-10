@@ -18,6 +18,11 @@
                         Add Users
                     </li>
                 </a>
+                <a href="viewusers.php">
+                    <li class="border-b border-[#2d3c42] cursor-pointer hover:bg-[#2d3c42] py-3 pl-4">
+                        View Users
+                    </li>
+                </a>
                 <a href="genreport.php">
                     <li class="border-b border-[#2d3c42] cursor-pointer hover:bg-[#2d3c42] py-3 pl-4">
                         Generate Report

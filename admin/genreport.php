@@ -92,24 +92,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if ($result->num_rows > 0): ?>
                                         <?php while ($row = $result->fetch_assoc()): ?>
                                             <tr>
-                                                <td class="border-b px-4 py-2"><?php echo htmlspecialchars($row['id']); ?></td>
-                                                <td class="border-b px-4 py-2"><?php echo htmlspecialchars($row['title']); ?></td>
-                                                <td class="border-b px-4 py-2"><?php echo htmlspecialchars($row['start_time']); ?></td>
-                                                <td class="border-b px-4 py-2"><?php echo htmlspecialchars($row['end_time']); ?></td>
-                                                <td class="border-b px-4 py-2">
-                                                    <button class="bg-blue-500 text-white p-2 editBtn" data-id="<?php echo htmlspecialchars($row['id']); ?>" data-title="<?php echo htmlspecialchars($row['title']); ?>" data-start="<?php echo htmlspecialchars($row['start_time']); ?>" data-end="<?php echo htmlspecialchars($row['end_time']); ?>">Edit</button>
-                                                    <button class="bg-red-500 text-white deleteBtn p-2" data-id="<?php echo htmlspecialchars($row['id']); ?>">Delete</button>
-                                                </td>
+                                                <td class="border-b px-4 py-2"><?php echo htmlspecialchars($row['username']); ?></td>
+                                                <td class="border-b px-4 py-2"><?php echo htmlspecialchars($row['total_questions']); ?></td>
+                                                <td class="border-b px-4 py-2"><?php echo htmlspecialchars($row['total_responses']); ?></td>
+                                                <td class="border-b px-4 py-2"><?php echo htmlspecialchars($row['correct_answers']); ?></td>
                                             </tr>
                                         <?php endwhile; ?>
-                                    <?php else: ?>
-                                        <tr>
-                                            <td colspan="5" class="px-4 py-2 text-center">No tests available</td>
-                                        </tr>
-                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
