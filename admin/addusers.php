@@ -7,21 +7,32 @@ if (!(isset($_SESSION['adminID']))) {
 }
 ?>
 <?php
-    include('../config/db.php');
+include('../config/db.php');
 
-    if($_SERVER['REQUEST_METHOD']=='POST'){
-        $name = $_POST['fullname'];
-        $username = $_POST['username'];
-        $password = $_POST['password'];
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+if($_SERVER['REQUEST_METHOD']=='POST'){
+    $name = $_POST['fullname'];
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-         $stmt = $conn->prepare("INSERT INTO user (name, username, password) VALUES (?, ?, ?)");
-                $stmt->bind_param('sss', $name,$username,$hashedPassword);
-                if (!$stmt->execute()) {
-                    echo "<script>alert('Error inserting user: " . htmlspecialchars($user['username']) . " - " . $stmt->error . "');</script>";
-                }
-                echo "<script>alert('Added Successfull');</script>";
+    $stmt = $conn->prepare("SELECT * FROM user WHERE username = ?");
+    $stmt->bind_param('s', $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        echo "<script>alert('User already exists');</script>";
+    } else {
+        $stmt = $conn->prepare("INSERT INTO user (name, username, password) VALUES (?, ?, ?)");
+        $stmt->bind_param('sss', $name, $username, $hashedPassword);
+
+        if (!$stmt->execute()) {
+            echo "<script>alert('Error inserting user: " . htmlspecialchars($username) . " - " . $stmt->error . "');</script>";
+        } else {
+            echo "<script>alert('Added Successfully');</script>";
+        }
     }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
